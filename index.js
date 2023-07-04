@@ -14,18 +14,18 @@
 // const b = [40,30,70,20,40,20];
 
 // TD 08
-// const nbA = 4;
-// const nbB = 5;
-// const valeurs = [21,11,84,49,13,27,52,43,29,42,11,47,14,80,93,52,14,76,74,54];
-// const a = [896,782,943,928];
-// const b = [800,439,50,790,1470];
+const nbA = 4;
+const nbB = 5;
+const valeurs = [21,11,84,49,13,27,52,43,29,42,11,47,14,80,93,52,14,76,74,54];
+const a = [896,782,943,928];
+const b = [800,439,50,790,1470];
 
 // TD 09
-const nbA = 4;
-const nbB = 6;
-const valeurs = [45,60,15,30,45,40,35,15,10,35,25,5,20,15,45,55,10,55,30,40,55,10,10,50];
-const a = [25,30,10,45];
-const b = [20,15,35,10,20,10];
+// const nbA = 4;
+// const nbB = 6;
+// const valeurs = [45,60,15,30,45,40,35,15,10,35,25,5,20,15,45,55,10,55,30,40,55,10,10,50];
+// const a = [25,30,10,45];
+// const b = [20,15,35,10,20,10];
 
 // EXEMPLE DE CAS DEGENERE LECON
 // const nbA = 4;
@@ -36,7 +36,7 @@ const b = [20,15,35,10,20,10];
 
 /** =============== GENENRATE BASE SOLUTION =============== */
 
-const {createMatrice, verifyQuantite, generateBaseSolution} = require('./module');
+const {createMatrice, verifyQuantite, generateBaseSolution, generatePotentiels, deltaXY, generateOptimalSolution} = require('./module');
 let matrice = {};
 let baseSolution = {};
 let matriceOriginal = {};
@@ -53,7 +53,7 @@ console.log("\nLes quantités de demandes dans les magasins de déstination: \n"
 verifyQuantite(a,b);
 
 let max = Math.max(...valeurs)+1;
-
+max = Infinity; //remplacer le min du tab par infini
 baseSolution = generateBaseSolution(index, matrice, a, b, max);
 
 
@@ -83,25 +83,15 @@ console.log("\n=> Dont le coût total de transport est de:", z);
 /** =============== GENERATE OPTIMAL SOLUTION =============== */
 // Trouver les potentiels Vx, C(x,y), Vy
 
-let potentielVX = [];// de a -> d (a1 -> a4)
-let potentielVY = [];// de 1 -> 6 (b1 -> b6)
-let objetPVX = {};
-let objetPVY = {};
-console.log(pSIndex);
-let potentielCXY = [];
-pSIndex.forEach(id => {
-    potentielCXY.push(matriceOriginal[id]);
-})
+const potentiels = generatePotentiels(baseSolution,matriceOriginal, nbA, nbB);
+console.log('potentiels des sommets => ',potentiels[0]);
+console.log('potentiels des arcs => ', potentiels[1]);
 
-console.log('index of 60',potentielCXY.indexOf(10));
+// Calculer Delta(x,y) = Vx + C(x,y) - Vy pour les cases vides c-a-d les couts marginaux
 
-
-
-
-console.log(potentielCXY);
-
-
-
-// Calculer Delta(x,y) = Vx + C(x,y) = Vy pour les cases vides
-
+const deltas = deltaXY(baseSolution, potentiels, matriceOriginal);
+console.log('couts marginaux => ', deltas);
 // Tant qu'il existe Delta(x,y) < 0 => substitution de vecteur et refaire les étapes
+
+const optimalSolution = generateOptimalSolution(baseSolution,deltas,matriceOriginal,nbA,nbB);
+console.log('solution optimal => ', optimalSolution);
