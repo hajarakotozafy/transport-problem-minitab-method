@@ -83,15 +83,32 @@ console.log("\n=> Dont le coût total de transport est de:", z);
 /** =============== GENERATE OPTIMAL SOLUTION =============== */
 // Trouver les potentiels Vx, C(x,y), Vy
 
-const potentiels = generatePotentiels(baseSolution,matriceOriginal, nbA, nbB);
-console.log('potentiels des sommets => ',potentiels[0]);
-console.log('potentiels des arcs => ', potentiels[1]);
+let preOptimalSolution = baseSolution;
+let optimal = false;
+while(!optimal){
 
-// Calculer Delta(x,y) = Vx + C(x,y) - Vy pour les cases vides c-a-d les couts marginaux
+    const potentiels = generatePotentiels(preOptimalSolution,matriceOriginal, nbA, nbB);
+    console.log('potentiels des sommets => ',potentiels[0]);
+    console.log('potentiels des arcs => ', potentiels[1]);
+    
+    // Calculer Delta(x,y) = Vx + C(x,y) - Vy pour les cases vides c-a-d les couts marginaux
+    
+    const deltas = deltaXY(preOptimalSolution, potentiels, matriceOriginal);
+    console.log('couts marginaux => ', deltas);
+    // Tant qu'il existe Delta(x,y) < 0 => substitution de vecteur et refaire les étapes
+    let isNegativeExit = false;
+    deltas.forEach(delta=>{
+        if(Object.values(delta)[0]<0){
+            isNegativeExit = true;
+        }
+    })
+    if(isNegativeExit){
+        preOptimalSolution = generateOptimalSolution(preOptimalSolution,deltas,matriceOriginal,nbA,nbB);
+    }else{
+        optimal=true;
+    }
+}
 
-const deltas = deltaXY(baseSolution, potentiels, matriceOriginal);
-console.log('couts marginaux => ', deltas);
-// Tant qu'il existe Delta(x,y) < 0 => substitution de vecteur et refaire les étapes
+optimalSolution = preOptimalSolution;
 
-const optimalSolution = generateOptimalSolution(baseSolution,deltas,matriceOriginal,nbA,nbB);
 console.log('solution optimal => ', optimalSolution);

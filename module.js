@@ -205,8 +205,6 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
         }
     });
 
-    console.log('solution de base => ', fullMatriceBase)
-
     let lignes = [];
     let lignesIndex = [];
 
@@ -228,15 +226,6 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
         lignes.push(ligne);
         lignesIndex.push(ligneInd);
     }
-    
-    // lignes = [
-    //     [0,0,50,0,0,0],
-    //     [0,30,10,0,0,20],
-    //     [20,0,0,0,0,0],
-    //     [20,0,10,20,40,0]
-    // ]
-    console.log('matrice de la solution de base regourpé par ligne => ', lignes);
-    console.log('les index de la matrice de la solution de base regourpé par ligne => ', lignesIndex);
 
     let negativeDeltasIndex = [];
     let negativeDeltasValue = [];
@@ -249,8 +238,10 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
     })
 
     //atao anaty boucle manomboka eto
-    let headIndex = negativeDeltasIndex[0];
-    let headValue = negativeDeltasValue[0];
+    for(let i = 0; i < negativeDeltasIndex.length; i++){
+
+    let headIndex = negativeDeltasIndex[i];
+    let headValue = negativeDeltasValue[i];
     
     let numLigne = indexToCoordinates(headIndex).i;
     let numCol = indexToCoordinates(headIndex).j;
@@ -295,13 +286,46 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
             }
         }
     }
-    console.log(lignes);
-    searchPath(loopPath, 2, 'a3b2');
-    console.log('chemin actulel => ', loopPath);
+   
+    searchPath(loopPath, numLigne, headIndex);
+   console.log(loopPath);
+    let loopMin = Infinity;
+    for(let i=1; i < loopPath.length; i++){
+        if(fullMatriceBase[loopPath[i]]<loopMin){
+            loopMin = fullMatriceBase[loopPath[i]]
+        }
+    }
+    chemins.push({substitue: headIndex, gain: loopMin*headValue, substitueValue: loopMin, chemin: loopPath});
+}
 
-    console.log('les chemins pour chaque cout marginaux négatifs =>',chemins);
+    let gain = 0;
+    let cheminPrise = [];
+    let substitueValue;
+    chemins.map(chemin => {
+        if(chemin.gain < gain){
+            gain = chemin.gain;
+            cheminPrise = chemin.chemin;
+            substitueValue = chemin.substitueValue;
+        }
+    })
 
-    return preOptimalSolution;
+
+    for(let i = 0; i < cheminPrise.length; i++){
+        if(i%2==0){
+            fullMatriceBase[cheminPrise[i]] += substitueValue;
+        }else {
+            fullMatriceBase[cheminPrise[i]] -= substitueValue;
+        }
+    }
+    
+    let ids = Object.keys(fullMatriceBase);
+
+    ids.forEach(id => {
+        if(fullMatriceBase[id] != 0){
+            optimalSolution[`${id}`] = fullMatriceBase[`${id}`]
+        }
+    })
+    return optimalSolution;
 }
 
 const parcoursLigne = (ligne, numLigne) => {
