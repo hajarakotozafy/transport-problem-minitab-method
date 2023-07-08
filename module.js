@@ -254,7 +254,9 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
             loopPath.pop();
         }
         if(loopPath.length == 0 || indexToCoordinates(currentIndex).j == indexToCoordinates(loopPath[`${loopPath.length-1}`]).j){
-            loopPath.push(currentIndex);
+            if(!trouve){
+                loopPath.push(currentIndex);
+            }
             let ligne = parcoursLigne(lignes[rowNumber], rowNumber);
             ligne = ligne.filter(id => id != currentIndex);
             if(ligne.length == 0 && !trouve){
@@ -265,7 +267,9 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
                             loopPath.pop();
                         }
                         if(indexToCoordinates(id).i == indexToCoordinates(loopPath[`${loopPath.length-1}`]).i){
-                            loopPath.push(id);
+                            if(!trouve){
+                                loopPath.push(id);
+                            }
                             let colonneId = indexToCoordinates(id).j;
                             if(colonneId != numCol){
                                 let colonne = parcoursColonne(lignes, colonneId);
@@ -290,12 +294,13 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
     searchPath(loopPath, numLigne, headIndex);
    console.log(loopPath);
     let loopMin = Infinity;
-    for(let i=1; i < loopPath.length; i++){
+    for(let i=1; i < loopPath.length; i=i+2){
         if(fullMatriceBase[loopPath[i]]<loopMin){
             loopMin = fullMatriceBase[loopPath[i]]
         }
     }
     chemins.push({substitue: headIndex, gain: loopMin*headValue, substitueValue: loopMin, chemin: loopPath});
+    console.log(chemins);
 }
 
     let gain = 0;
@@ -311,10 +316,10 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
 
 
     for(let i = 0; i < cheminPrise.length; i++){
-        if(i%2==0){
-            fullMatriceBase[cheminPrise[i]] += substitueValue;
-        }else {
+        if(i%2!=0){
             fullMatriceBase[cheminPrise[i]] -= substitueValue;
+        }else {
+            fullMatriceBase[cheminPrise[i]] += substitueValue;
         }
     }
     
