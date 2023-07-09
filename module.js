@@ -78,13 +78,24 @@ function generateBaseSolution(tabIndex, matrice, a, b, maxiOfTab){
                         matrice[index] = maxiOfTab;
                     }
                 })
-            }else{
+            }else if(a[aId-1] > b[bId-1]){
                 baseSolution[`a${aId}b${bId}`] = b[bId-1];
                 a[aId-1] = a[aId-1] - b[bId-1];
                 b[bId-1] = 0;
                 tabIndex.forEach(val => {
                     if(val.slice(2,4)==`b${bId}`){
-                        matrice[`${val}`]=maxiOfTab;
+                        // matrice[`${val}`]=maxiOfTab;
+                        matrice[`${val}`]=Infinity;
+                    }
+                })
+                console.log("base: ", baseSolution, "a: ", a, "b: ", b, "matrice: ", matrice)
+            }else{
+                baseSolution[`a${aId}b${bId}`] = a[aId-1];
+                a[aId-1] = b[bId-1] = 0;
+                tabIndex.forEach(index => {
+                    if(index.slice(0,2)==`a${aId}` || index.slice(2,4)==`b${bId}`){
+                        // matrice[index] = maxiOfTab;
+                        matrice[index] = Infinity;
                     }
                 })
             }
