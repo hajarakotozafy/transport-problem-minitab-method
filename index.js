@@ -21,11 +21,26 @@
 // const b = [800,439,50,790,1470];
 
 // TD 09
+// const nbA = 4;
+// const nbB = 6;
+// const valeurs = [45,60,15,30,45,40,35,15,10,35,25,5,20,15,45,55,10,55,30,40,55,10,10,50];
+// const a = [25,30,10,45];
+// const b = [20,15,35,10,20,10];
+
+// TD 09 Cas dégénéré minitab
 const nbA = 4;
 const nbB = 6;
-const valeurs = [45,60,15,30,45,40,35,15,10,35,25,5,20,15,45,55,10,55,30,40,55,10,10,50];
+const valeurs = [45,60,15,30,45,40,35,15,35,10,25,5,20,15,45,55,10,55,30,40,55,10,10,50];
 const a = [25,30,10,45];
-const b = [20,15,35,10,20,10];
+const b = [35,15,25,10,20,5];
+
+// const nbA = 3;
+// const nbB = 4;
+// const valeurs = [2,5,8,4,6,8,3,5,8,7,4,5];
+// const a = [7,10,13];
+// const b = [7,3,12,8];
+
+
 
 // EXEMPLE DE CAS DEGENERE LECON
 // const nbA = 4;
@@ -35,7 +50,7 @@ const b = [20,15,35,10,20,10];
 // const b = [20,15,35,10,20,10];
 
 /** =============== GENENRATE BASE SOLUTION =============== */
-
+const {Graph} = require('./graph');
 const {createMatrice, verifyQuantite, generateBaseSolution, generatePotentiels, deltaXY, generateOptimalSolution} = require('./module');
 let matrice = {};
 let baseSolution = {};
@@ -104,11 +119,30 @@ while(!optimal){
     })
     if(isNegativeExit){
         preOptimalSolution = generateOptimalSolution(preOptimalSolution,deltas,matriceOriginal,nbA,nbB);
+        console.log("neg")
+        const graph = new Graph();
+        Object.keys(preOptimalSolution).forEach(key => {
+            graph.addEdge(key.slice(0,2), key.slice(2,4));
+        })
+        console.log('cas dégénéré?: ', graph.isConnected() ? 'non' : 'oui');
+        if(graph.isConnected()){
+            console.log("hehe")
+            continue
+        }else{
+            console.log("optimal dégénéré")
+            optimal = true;
+        }
     }else{
         optimal=true;
     }
 }
 
-optimalSolution = preOptimalSolution;
 
-console.log('solution optimal => ', optimalSolution);
+optimalSolution = preOptimalSolution;
+// console.log(optimalSolution)
+const zOpt = Object.keys(optimalSolution).reduce((acc, el) =>
+{
+    return acc + matriceOriginal[`${el}`]*optimalSolution[`${el}`];
+},0);
+
+console.log('solution optimal => ', optimalSolution, 'avec z : ', zOpt);

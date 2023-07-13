@@ -69,23 +69,27 @@ class Graph {
 
 }
 
-// Création du graphe
-const graph = new Graph();
+// // Création du graphe
+// const graph = new Graph();
 
-// Ajout des arêtes du graphe
-graph.addEdge('a1', 'b2');
-graph.addEdge('a1', 'b5');
-graph.addEdge('a2', 'b4');
-graph.addEdge('a3', 'b1');
-graph.addEdge('a3', 'b3');
-graph.addEdge('a3', 'b4');
-graph.addEdge('a3', 'b5');
-graph.addEdge('a4', 'b5');
+// // Ajout des arêtes du graphe
+// graph.addEdge('a1', 'b2');
+// graph.addEdge('a1', 'b5');
+// graph.addEdge('a2', 'b4');
+// graph.addEdge('a3', 'b1');
+// graph.addEdge('a3', 'b3');
+// graph.addEdge('a3', 'b4');
+// graph.addEdge('a3', 'b5');
+// graph.addEdge('a4', 'b5');
 
-// Vérification si le graphe est connexe
-const isConnected = graph.isConnected();
-console.log('Graphe connexe:', isConnected);
+// // Vérification si le graphe est connexe
+// const isConnected = graph.isConnected();
+// console.log('Graphe connexe:', isConnected);
 
-// Recherche des composantes connexes
-const connectedComponents = graph.findConnectedComponents();
-console.log('Composantes connexes:', connectedComponents);
+// // Recherche des composantes connexes
+// const connectedComponents = graph.findConnectedComponents();
+// console.log('Composantes connexes:', connectedComponents);
+
+module.exports = {
+  Graph,
+}

@@ -1,3 +1,4 @@
+const epsilon = 0.000000000000000000000001
 // création de l'objet matrice
 function createMatrice(valeurs, a, b, nbA, nbB){
     // a: les quantités disponibles dans les magasins de dépôt respectifs
@@ -46,6 +47,7 @@ function verifyQuantite(a,b){
 
 // génère la solution de base
 function generateBaseSolution(tabIndex, matrice, a, b, maxiOfTab){
+    const {Graph} = require('./Graph.js');
     let miniOfTab
     let indexOfMiniOfTab;
     let newValueOfMatrice; //evolution des valeurs dans la matrice
@@ -75,7 +77,7 @@ function generateBaseSolution(tabIndex, matrice, a, b, maxiOfTab){
                 a[aId-1] = 0;
                 tabIndex.forEach(index => {
                     if(index.slice(0,2)==`a${aId}`){
-                        matrice[index] = maxiOfTab;
+                        matrice[index] = Infinity;
                     }
                 })
             }else if(a[aId-1] > b[bId-1]){
@@ -88,7 +90,6 @@ function generateBaseSolution(tabIndex, matrice, a, b, maxiOfTab){
                         matrice[`${val}`]=Infinity;
                     }
                 })
-                console.log("base: ", baseSolution, "a: ", a, "b: ", b, "matrice: ", matrice)
             }else{
                 baseSolution[`a${aId}b${bId}`] = a[aId-1];
                 a[aId-1] = b[bId-1] = 0;
@@ -115,7 +116,67 @@ function generateBaseSolution(tabIndex, matrice, a, b, maxiOfTab){
         else continue
     }
 
-    return baseSolution;
+    // return baseSolution;
+
+    const graph = new Graph();
+    Object.keys(baseSolution).forEach(key => {
+        graph.addEdge(key.slice(0,2), key.slice(2,4));
+    })
+    console.log('cas dégénéré?: ', graph.isConnected() ? 'non' : 'oui');
+    if(graph.isConnected()){
+        return baseSolution;
+    }else{
+        const connectedComponents = graph.findConnectedComponents();
+        console.log('Composantes connexes: ', connectedComponents);
+        let fooEdge = {};
+        let head = '';
+        for(let i = 0; i < connectedComponents.length; i++){
+            // if(i==0){
+            //     connectedComponents[i].forEach(key => {
+            //         if(key.slice(0,1)=='a'&&head==''){
+            //             head += key;
+            //         }
+            //     })
+            // }else{
+            //     connectedComponents[i].forEach(key => {
+            //         if(key.slice(0,1)=='b' && head!=''){
+            //             head += key;
+            //             baseSolution[`${head}`] = epsilon;
+            //             head = '';
+
+            //         }
+            //     })
+            // }
+            if(head==''){
+                    connectedComponents[i].forEach(key => {
+                        if(key.slice(0,1)=='a'&&head==''){
+                            head += key;
+                        }
+                    })
+            }else{
+                connectedComponents[i].forEach(key => {
+                    if(key.slice(0,1)=='b'&&head!=''){
+                        head += key;
+                        baseSolution[`${head}`] = epsilon;
+                        head = '';
+                    }
+
+                    
+                })
+                
+                if(i<(connectedComponents.length-1)){
+
+                    connectedComponents[i].forEach(key => {
+                        if(key.slice(0,1)=='a'&&head==''){
+                            head += key;
+                        }
+                    })
+                }
+            }
+        }
+        console.log(baseSolution);
+        return baseSolution;
+    }
 }
 
 const generatePotentiels = (baseSolution, matriceOriginal, nbA, nbB) => {
@@ -129,7 +190,7 @@ const generatePotentiels = (baseSolution, matriceOriginal, nbA, nbB) => {
         const pSIndex = Object.keys(baseSolution);
         pSIndex.forEach(id => {
             if(id.slice(0,2) == `a${i}`){
-                potentielsXY[id] = Number(matriceOriginal[id]);
+                potentielsXY[`${id}`] = Number(matriceOriginal[`${id}`]);
                 list[i-1].append(undefined, id.slice(2,4));
             }
         })
@@ -137,7 +198,7 @@ const generatePotentiels = (baseSolution, matriceOriginal, nbA, nbB) => {
     const maxPXY = Math.max(...Object.values(potentielsXY));
     let maxId = NaN;
     Object.keys(potentielsXY).forEach(id => {
-        if(maxId != NaN && potentielsXY[id]==maxPXY) maxId = id;
+        if(maxId != NaN && potentielsXY[`${id}`]==maxPXY) maxId = id;
     })
     const source = maxId.slice(0,2);
     list[`${Number(source.slice(1,2))-1}`].insertPotentiel(0, source);
@@ -184,6 +245,7 @@ const generatePotentiels = (baseSolution, matriceOriginal, nbA, nbB) => {
         nodePotentiel,
         potentielsXY
     ];
+    console.log("hehe: ", potentiels)
 
     return potentiels;
 }
@@ -282,20 +344,29 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
                                 loopPath.push(id);
                             }
                             let colonneId = indexToCoordinates(id).j;
-                            if(colonneId != numCol){
-                                let colonne = parcoursColonne(lignes, colonneId);
-                                colonne = colonne.filter(index => index != id);
-                                if(colonne.length == 0){
-                                    loopPath.pop();
-                                }else{
-                                    colonne.forEach(index => {
-                                        let ligneId = indexToCoordinates(index).i;
-                                        searchPath(loopPath, ligneId, index);
-                                    })
+                            if(!trouve){
+                                if(colonneId != numCol){
+                                    let colonne = parcoursColonne(lignes, colonneId);
+                                    colonne = colonne.filter(index => index != id);
+                                    if(colonne.length == 0){
+                                        loopPath.pop();
+                                    }else{
+                                        colonne.forEach(index => {
+                                            let ligneId = indexToCoordinates(index).i;
+                                            searchPath(loopPath, ligneId, index);
+                                            if(!trouve&&loopPath.length%2!=0){
+                                                loopPath.pop()
+                                            }
+                                        })
+                                    }
+                                } else {
+                                    trouve = true;
                                 }
-                            } else {
-                                trouve = true;
                             }
+                        }
+
+                        if(!trouve&&loopPath.length%2==0){
+                            loopPath.pop();
                         }
                 })
             }
@@ -333,7 +404,7 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
             fullMatriceBase[cheminPrise[i]] += substitueValue;
         }
     }
-    
+    console.log(fullMatriceBase)
     let ids = Object.keys(fullMatriceBase);
 
     ids.forEach(id => {
@@ -341,6 +412,7 @@ const generateOptimalSolution = (baseSolution, deltas, matriceOriginal, nbA, nbB
             optimalSolution[`${id}`] = fullMatriceBase[`${id}`]
         }
     })
+    console.log(optimalSolution)
     return optimalSolution;
 }
 
@@ -362,6 +434,7 @@ const parcoursColonne = (ligne, numColonne) => {
     const colonneId = 'b'+(Number(numColonne)+1);
     let a;
     let values = [];
+    console.log(ligne)
     for(let i = 0; i<ligne.length; i++){
         a = 'a'+(i+1);
         const index = a + colonneId;
